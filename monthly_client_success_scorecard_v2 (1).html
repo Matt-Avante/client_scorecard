@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Monthly Client Success Scorecard</title>
+  <style>
+    :root{
+      --navy:#152238;
+      --blue:#2563eb;
+      --blue-soft:#eff6ff;
+      --green:#16a34a;
+      --green-soft:#ecfdf3;
+      --amber:#d97706;
+      --amber-soft:#fffbeb;
+      --orange:#ea580c;
+      --orange-soft:#fff7ed;
+      --red:#dc2626;
+      --red-soft:#fef2f2;
+      --grey:#64748b;
+      --light:#f8fafc;
+      --line:#e2e8f0;
+      --white:#ffffff;
+      --shadow:0 16px 40px rgba(15,23,42,.10);
+      --radius:18px;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:linear-gradient(180deg,#f8fafc 0%,#eef4fb 100%);
+      color:var(--navy);
+      min-height:100vh;
+    }
+
+    .shell{
+      max-width:900px;
+      margin:0 auto;
+      padding:28px 18px 60px;
+    }
+
+    .brand{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:18px;
+      gap:16px;
+    }
+
+    .brand-mark{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      font-weight:800;
+      letter-spacing:-.02em;
+    }
+
+    .logo{
+      width:42px;
+      height:42px;
+      border-radius:12px;
+      background:linear-gradient(135deg,var(--blue),#7c3aed);
+      display:grid;
+      place-items:center;
+      color:white;
+      font-weight:800;
+      box-shadow:0 8px 20px rgba(37,99,235,.25);
+    }
+
+    .progress-wrap{
+      background:var(--white);
+      border:1px solid var(--line);
+      padding:12px 14px;
+      border-radius:999px;
+      box-shadow:0 8px 20px rgba(15,23,42,.05);
+      min-width:220px;
+    }
+
+    .progress-label{
+      display:flex;
+      justify-content:space-between;
+      font-size:12px;
+      color:var(--grey);
+      margin-bottom:7px;
+    }
+
+    .progress{
+      height:8px;
+      background:#eaf0f7;
+      border-radius:999px;
+      overflow:hidden;
+    }
+
+    .progress > span{
+      display:block;
+      height:100%;
+      width:0%;
+      background:linear-gradient(90deg,var(--blue),#7c3aed);
+      transition:width .3s ease;
+    }
+
+    .card{
+      background:rgba(255,255,255,.98);
+      border:1px solid rgba(226,232,240,.95);
+      border-radius:26px;
+      box-shadow:var(--shadow);
+      padding:34px;
+    }
+
+    .step{display:none; animation:fade .25s ease}
+    .step.active{display:block}
+    @keyframes fade{from{opacity:.3;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+    .eyebrow{
+      display:inline-flex;
+      gap:7px;
+      align-items:center;
+      font-size:13px;
+      font-weight:700;
+      color:var(--blue);
+      background:var(--blue-soft);
+      padding:7px 10px;
+      border-radius:999px;
+      margin-bottom:16px;
+    }
+
+    h1,h2{margin:0 0 12px;letter-spacing:-.035em}
+    h1{font-size:42px;line-height:1.05}
+    h2{font-size:30px;line-height:1.12}
+    p.lead{font-size:18px;line-height:1.6;color:#475569;margin:0 0 22px}
+
+    .helper{
+      font-size:14px;
+      color:var(--grey);
+      line-height:1.5;
+      margin-top:6px;
+    }
+
+    .field{margin:22px 0}
+    label.title{
+      display:block;
+      font-weight:750;
+      font-size:18px;
+      margin-bottom:10px;
+    }
+
+    input[type="text"], input[type="email"], input[type="month"], textarea{
+      width:100%;
+      border:1.5px solid var(--line);
+      border-radius:14px;
+      padding:14px 15px;
+      font:inherit;
+      outline:none;
+      transition:.2s;
+      background:#fff;
+    }
+
+    input:focus, textarea:focus{
+      border-color:var(--blue);
+      box-shadow:0 0 0 4px rgba(37,99,235,.10);
+    }
+
+    textarea{min-height:120px;resize:vertical}
+
+    .options{
+      display:grid;
+      gap:12px;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+    }
+
+    .options.five{grid-template-columns:repeat(5,minmax(0,1fr))}
+    .options.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .options.one{grid-template-columns:1fr}
+
+    .option{
+      border:1.5px solid var(--line);
+      border-radius:16px;
+      padding:15px;
+      cursor:pointer;
+      background:#fff;
+      transition:.18s ease;
+      min-height:76px;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      gap:4px;
+      position:relative;
+    }
+
+    .option:hover{transform:translateY(-1px);border-color:#b9c8da}
+    .option input{position:absolute;opacity:0;pointer-events:none}
+    .option strong{font-size:16px}
+    .option span{font-size:13px;color:var(--grey)}
+
+    .option.selected.positive{border-color:var(--green);background:var(--green-soft)}
+    .option.selected.neutral{border-color:var(--amber);background:var(--amber-soft)}
+    .option.selected.warning{border-color:var(--orange);background:var(--orange-soft)}
+    .option.selected.negative{border-color:var(--red);background:var(--red-soft)}
+    .option.selected.info{border-color:var(--blue);background:var(--blue-soft)}
+
+    .emoji{font-size:25px;margin-bottom:3px}
+
+    .checkbox-grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:10px;
+    }
+
+    .check{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      border:1.5px solid var(--line);
+      border-radius:12px;
+      padding:12px 13px;
+      cursor:pointer;
+      background:white;
+    }
+
+    .check input{width:18px;height:18px;accent-color:var(--blue)}
+    .check:has(input:checked){border-color:var(--blue);background:var(--blue-soft)}
+
+    .scale{
+      display:grid;
+      grid-template-columns:repeat(10,1fr);
+      gap:7px;
+    }
+
+    .scale.nps{grid-template-columns:repeat(11,1fr)}
+    .scale button{
+      border:1.5px solid var(--line);
+      background:white;
+      height:46px;
+      border-radius:10px;
+      font-weight:700;
+      cursor:pointer;
+      color:var(--navy);
+    }
+
+    .scale button:hover{border-color:var(--blue)}
+    .scale button.active.low{background:var(--red-soft);border-color:var(--red);color:var(--red)}
+    .scale button.active.mid{background:var(--amber-soft);border-color:var(--amber);color:var(--amber)}
+    .scale button.active.high{background:var(--green-soft);border-color:var(--green);color:var(--green)}
+
+    .scale-labels{
+      display:flex;
+      justify-content:space-between;
+      color:var(--grey);
+      font-size:12px;
+      margin-top:8px;
+    }
+
+    .stars{
+      display:flex;
+      gap:8px;
+      font-size:38px;
+    }
+    .stars button{
+      border:0;
+      background:transparent;
+      cursor:pointer;
+      filter:grayscale(1);
+      opacity:.35;
+      padding:0;
+    }
+    .stars button.active{filter:none;opacity:1}
+
+    .conditional{
+      display:none;
+      margin-top:18px;
+      padding:18px;
+      border-radius:16px;
+      background:var(--light);
+      border:1px dashed #cbd5e1;
+    }
+    .conditional.show{display:block}
+
+    .nav{
+      display:flex;
+      justify-content:space-between;
+      gap:14px;
+      margin-top:28px;
+    }
+
+    button.primary, button.secondary{
+      border:0;
+      border-radius:13px;
+      padding:13px 20px;
+      font-weight:750;
+      font-size:15px;
+      cursor:pointer;
+    }
+
+    button.primary{
+      background:linear-gradient(135deg,var(--blue),#6d28d9);
+      color:white;
+      box-shadow:0 10px 22px rgba(37,99,235,.22);
+    }
+
+    button.secondary{
+      background:#edf2f7;
+      color:var(--navy);
+    }
+
+    button.primary:hover{transform:translateY(-1px)}
+
+    .summary{
+      display:grid;
+      grid-template-columns:160px 1fr;
+      gap:28px;
+      align-items:center;
+      padding:20px 0 6px;
+    }
+
+    .score-ring{
+      width:150px;
+      height:150px;
+      border-radius:50%;
+      display:grid;
+      place-items:center;
+      background:conic-gradient(var(--green) 0deg,#e5e7eb 0deg);
+      position:relative;
+    }
+    .score-ring::after{
+      content:"";
+      position:absolute;
+      width:112px;
+      height:112px;
+      border-radius:50%;
+      background:white;
+    }
+    .score-inner{
+      position:relative;
+      z-index:1;
+      text-align:center;
+    }
+    .score-inner b{font-size:38px}
+    .status-pill{
+      display:inline-block;
+      padding:7px 11px;
+      border-radius:999px;
+      font-weight:800;
+      font-size:13px;
+      margin-bottom:10px;
+    }
+
+    .summary-list{
+      display:grid;
+      gap:10px;
+      margin-top:16px;
+    }
+    .summary-row{
+      display:flex;
+      justify-content:space-between;
+      gap:14px;
+      padding:11px 0;
+      border-bottom:1px solid var(--line);
+    }
+
+    .note{
+      padding:14px 16px;
+      border-radius:14px;
+      background:var(--blue-soft);
+      color:#1e3a8a;
+      font-size:14px;
+      line-height:1.5;
+      margin-top:18px;
+    }
+
+    .tiny{font-size:12px;color:var(--grey);margin-top:12px}
+    .error{color:var(--red);font-size:13px;margin-top:8px;display:none}
+
+    @media(max-width:760px){
+      .brand{align-items:flex-start;flex-direction:column}
+      .progress-wrap{width:100%}
+      .card{padding:24px 18px}
+      h1{font-size:34px}
+      h2{font-size:26px}
+      .options,.options.five,.options.three,.checkbox-grid{grid-template-columns:1fr}
+      .scale,.scale.nps{grid-template-columns:repeat(5,1fr)}
+      .summary{grid-template-columns:1fr;text-align:center}
+      .score-ring{margin:0 auto}
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="brand">
+      <div class="brand-mark">
+        <div class="logo">CS</div>
+        <div>
+          <div>Client Success Scorecard</div>
+          <div style="font-size:12px;color:#64748b;font-weight:500">Monthly partnership check-in</div>
+        </div>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-label"><span id="progressText">Welcome</span><span id="progressPercent">0%</span></div>
+        <div class="progress"><span id="progressBar"></span></div>
+      </div>
+    </div>
+
+    <form id="scorecard">
+      <div class="card">
+
+        <section class="step active" data-title="Welcome">
+          <div class="eyebrow">👋 Monthly check-in</div>
+          <h1>Help us help you.</h1>
+          <p class="lead">This quick scorecard takes around 2–3 minutes. It helps us understand how we’re working together, what’s happening in your business and where we can support you better.</p>
+          <div class="note">Your Account Manager will review your responses before your next meeting, so the conversation can focus on what matters most to your business.</div>
+          <div class="nav">
+            <span></span>
+            <button type="button" class="primary next">Start Scorecard</button>
+          </div>
+        </section>
+
+        <section class="step" data-title="About you">
+          <div class="eyebrow">1 of 8 · About you</div>
+          <h2>First, a few quick details.</h2>
+          <div class="field">
+            <label class="title">Your name</label>
+            <input type="text" name="client_name" required placeholder="e.g. Harvey Smith">
+          </div>
+          <div class="field">
+            <label class="title">Company</label>
+            <input type="text" name="company" required placeholder="e.g. Toffeln">
+          </div>
+          <div class="field">
+            <label class="title">Month</label>
+            <input type="month" name="month" required>
+          </div>
+          <div class="nav"><button type="button" class="secondary back">Back</button><button type="button" class="primary next">Continue</button></div>
+        </section>
+
+        <section class="step" data-title="Partnership">
+          <div class="eyebrow">2 of 8 · Partnership</div>
+          <h2>How has working with us felt this month?</h2>
+
+          <div class="field">
+            <label class="title">Overall, how happy have you been with our service?</label>
+            <div class="options five single-choice" data-name="overall">
+              <label class="option positive"><input type="radio" name="overall" value="10"><div class="emoji">😀</div><strong>Excellent</strong></label>
+              <label class="option positive"><input type="radio" name="overall" value="8"><div class="emoji">🙂</div><strong>Very good</strong></label>
+              <label class="option neutral"><input type="radio" name="overall" value="6"><div class="emoji">😐</div><strong>Okay</strong></label>
+              <label class="option warning"><input type="radio" name="overall" value="4"><div class="emoji">🙁</div><strong>Could be better</strong></label>
+              <label class="option negative"><input type="radio" name="overall" value="2"><div class="emoji">😞</div><strong>Needs attention</strong></label>
+            </div>
+            <div class="conditional" id="overallFollow">
+              <label class="title">We’d genuinely like to understand why.</label>
+              <textarea name="overall_reason" placeholder="Tell us what’s influenced your score..."></textarea>
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="title">How well have we communicated with you?</label>
+            <div class="scale" data-field="communication"></div>
+            <input type="hidden" name="communication">
+            <div class="scale-labels"><span>Poor</span><span>Excellent</span></div>
+            <div class="conditional" id="communicationFollow">
+              <label class="title">What could we have done differently?</label>
+              <textarea name="communication_reason"></textarea>
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="title">Have you felt informed about the work we’ve been carrying out?</label>
+            <div class="options three single-choice" data-name="informed">
+              <label class="option positive"><input type="radio" name="informed" value="10"><strong>🟢 Always</strong></label>
+              <label class="option neutral"><input type="radio" name="informed" value="7"><strong>🟡 Mostly</strong></label>
+              <label class="option negative"><input type="radio" name="informed" value="3"><strong>🔴 Not really</strong></label>
+            </div>
+            <div class="conditional" id="informedFollow">
+              <label class="title">What information would have helped?</label>
+              <textarea name="informed_reason"></textarea>
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="title">How responsive have we been?</label>
+            <div class="stars" data-field="responsiveness">
+              <button type="button" data-value="1">⭐</button><button type="button" data-value="2">⭐</button><button type="button" data-value="3">⭐</button><button type="button" data-value="4">⭐</button><button type="button" data-value="5">⭐</button>
+            </div>
+            <input type="hidden" name="responsiveness">
+            <div class="conditional" id="responsiveFollow">
+              <label class="title">How could we improve?</label>
+              <textarea name="responsiveness_reason"></textarea>
+            </div>
+          </div>
+
+          <div class="nav"><button type="button" class="secondary back">Back</button><button type="button" class="primary next">Continue</button></div>
+        </section>
+
+        <section class="step" data-title="Business update">
+          <div class="eyebrow">3 of 8 · Business update</div>
+          <h2>What’s happening inside your business?</h2>
+
+          <div class="field">
+            <label class="title">How would you rate the quality of enquiries or sales this month?</label>
+            <div class="options five single-choice" data-name="lead_quality">
+              <label class="option positive"><input type="radio" name="lead_quality" value="10"><strong>Excellent</strong></label>
+              <label class="option positive"><input type="radio" name="lead_quality" value="8"><strong>Good</strong></label>
+              <label class="option neutral"><input type="radio" name="lead_quality" value="6"><strong>Average</strong></label>
+              <label class="option negative"><input type="radio" name="lead_quality" value="3"><strong>Poor</strong></label>
+              <label class="option info"><input type="radio" name="lead_quality" value=""><strong>Too early to tell</strong></label>
+            </div>
+            <div class="conditional" id="leadFollow">
+              <label class="title">What issues have you experienced?</label>
+              <div class="checkbox-grid">
+                <label class="check"><input type="checkbox" name="lead_issues" value="Wrong locations">Wrong locations</label>
+                <label class="check"><input type="checkbox" name="lead_issues" value="Poor fit">Poor fit</label>
+                <label class="check"><input type="checkbox" name="lead_issues" value="Low budgets">Low budgets</label>
+                <label class="check"><input type="checkbox" name="lead_issues" value="Existing customers">Existing customers</label>
+                <label class="check"><input type="checkbox" name="lead_issues" value="Spam">Spam</label>
+                <label class="check"><input type="checkbox" name="lead_issues" value="No answer">No answer</label>
+                <label class="check"><input type="checkbox" name="lead_issues" value="Wrong service">Wrong service</label>
+                <label class="check"><input type="checkbox" name="lead_issues" value="Other">Other</label>
+              </div>
+              <textarea name="lead_issue_detail" placeholder="Tell us more..." style="margin-top:12px"></textarea>
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="title">Select anything we should know about.</label>
+            <p class="helper">Choose as many as apply.</p>
+            <div class="checkbox-grid">
+              <label class="check"><input type="checkbox" name="business_updates" value="New products">New products</label>
+              <label class="check"><input type="checkbox" name="business_updates" value="Promotions">Promotions</label>
+              <label class="check"><input type="checkbox" name="business_updates" value="New service">New service</label>
+              <label class="check"><input type="checkbox" name="business_updates" value="Price changes">Price changes</label>
+              <label class="check"><input type="checkbox" name="business_updates" value="Recruitment">Recruitment</label>
+              <label class="check"><input type="checkbox" name="business_updates" value="Staff changes">Staff changes</label>
+              <label class="check"><input type="checkbox" name="business_updates" value="New location">New location</label>
+              <label class="check"><input type="checkbox" name="business_updates" value="Website changes">Website changes</label>
+              <label class="check"><input type="checkbox" name="business_updates" value="Seasonal demand">Seasonal demand</label>
+              <label class="check"><input type="checkbox" name="business_updates" value="Stock issues">Stock issues</label>
+              <label class="check"><input type="checkbox" name="business_updates" value="Competitor activity">Competitor activity</label>
+              <label class="check"><input type="checkbox" name="business_updates" value="Nothing new">Nothing new</label>
+            </div>
+            <div class="conditional" id="businessFollow">
+              <label class="title">Tell us a little more.</label>
+              <textarea name="business_update_detail"></textarea>
+            </div>
+          </div>
+
+          <div class="nav"><button type="button" class="secondary back">Back</button><button type="button" class="primary next">Continue</button></div>
+        </section>
+
+        <section class="step" data-title="Client wins">
+          <div class="eyebrow">4 of 8 · Client wins</div>
+          <h2>Let’s celebrate what’s gone well.</h2>
+          <div class="field">
+            <label class="title">Has your business achieved any of these this month?</label>
+            <div class="checkbox-grid">
+              <label class="check"><input type="checkbox" name="wins" value="Won new customers">🎉 Won new customers</label>
+              <label class="check"><input type="checkbox" name="wins" value="Increased revenue">📈 Increased revenue</label>
+              <label class="check"><input type="checkbox" name="wins" value="Hit targets">🎯 Hit targets</label>
+              <label class="check"><input type="checkbox" name="wins" value="New staff">💼 Hired new staff</label>
+              <label class="check"><input type="checkbox" name="wins" value="New product">🚀 Launched a product</label>
+              <label class="check"><input type="checkbox" name="wins" value="New contract">🏆 Won a contract</label>
+              <label class="check"><input type="checkbox" name="wins" value="Positive feedback">⭐ Great customer feedback</label>
+              <label class="check"><input type="checkbox" name="wins" value="Other">Other</label>
+            </div>
+            <div class="conditional" id="winsFollow">
+              <label class="title">Tell us more — we’d love to hear about it.</label>
+              <textarea name="wins_detail"></textarea>
+            </div>
+          </div>
+          <div class="nav"><button type="button" class="secondary back">Back</button><button type="button" class="primary next">Continue</button></div>
+        </section>
+
+        <section class="step" data-title="Working together">
+          <div class="eyebrow">5 of 8 · Working together</div>
+          <h2>Help us improve the partnership.</h2>
+
+          <div class="field">
+            <label class="title">What’s one thing we’ve done particularly well?</label>
+            <textarea name="done_well"></textarea>
+          </div>
+
+          <div class="field">
+            <label class="title">What’s one thing you’d like us to improve next month?</label>
+            <textarea name="improve"></textarea>
+          </div>
+
+          <div class="field">
+            <label class="title">Do you feel we’re focused on the right priorities?</label>
+            <div class="scale" data-field="alignment"></div>
+            <input type="hidden" name="alignment">
+            <div class="scale-labels"><span>Not aligned</span><span>Completely aligned</span></div>
+            <div class="conditional" id="alignmentFollow">
+              <label class="title">What should we be prioritising instead?</label>
+              <textarea name="alignment_reason"></textarea>
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="title">Is there anything you’ve been meaning to ask us?</label>
+            <textarea name="questions"></textarea>
+          </div>
+
+          <div class="nav"><button type="button" class="secondary back">Back</button><button type="button" class="primary next">Continue</button></div>
+        </section>
+
+        <section class="step" data-title="Looking ahead">
+          <div class="eyebrow">6 of 8 · Looking ahead</div>
+          <h2>What’s coming up next?</h2>
+
+          <div class="field">
+            <label class="title">Do you have anything planned over the next few months?</label>
+            <div class="checkbox-grid">
+              <label class="check"><input type="checkbox" name="upcoming" value="Product launch">Product launch</label>
+              <label class="check"><input type="checkbox" name="upcoming" value="New service">New service</label>
+              <label class="check"><input type="checkbox" name="upcoming" value="Promotion">Promotion</label>
+              <label class="check"><input type="checkbox" name="upcoming" value="Exhibition">Exhibition or trade show</label>
+              <label class="check"><input type="checkbox" name="upcoming" value="Seasonal campaign">Seasonal campaign</label>
+              <label class="check"><input type="checkbox" name="upcoming" value="Website launch">Website launch</label>
+              <label class="check"><input type="checkbox" name="upcoming" value="Rebrand">Rebrand</label>
+              <label class="check"><input type="checkbox" name="upcoming" value="Expansion">Expansion or new location</label>
+              <label class="check"><input type="checkbox" name="upcoming" value="Recruitment">Recruitment</label>
+              <label class="check"><input type="checkbox" name="upcoming" value="Nothing planned">Nothing planned</label>
+            </div>
+            <div class="conditional" id="upcomingFollow">
+              <label class="title">Tell us more.</label>
+              <textarea name="upcoming_detail"></textarea>
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="title">Are there any challenges we may be able to help with?</label>
+            <div class="checkbox-grid">
+              <label class="check"><input type="checkbox" name="challenges" value="More enquiries">More enquiries</label>
+              <label class="check"><input type="checkbox" name="challenges" value="Better lead quality">Better lead quality</label>
+              <label class="check"><input type="checkbox" name="challenges" value="Website">Website improvements</label>
+              <label class="check"><input type="checkbox" name="challenges" value="Conversion rate">Conversion rate</label>
+              <label class="check"><input type="checkbox" name="challenges" value="Tracking">Tracking or analytics</label>
+              <label class="check"><input type="checkbox" name="challenges" value="Reporting">Reporting</label>
+              <label class="check"><input type="checkbox" name="challenges" value="Brand awareness">Brand awareness</label>
+              <label class="check"><input type="checkbox" name="challenges" value="CRM">CRM or automation</label>
+              <label class="check"><input type="checkbox" name="challenges" value="Recruitment">Recruitment</label>
+              <label class="check"><input type="checkbox" name="challenges" value="Other">Other</label>
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="title">Would you like to learn more about any additional services?</label>
+            <div class="checkbox-grid">
+              <label class="check"><input type="checkbox" name="services" value="Google Ads">Google Ads</label>
+              <label class="check"><input type="checkbox" name="services" value="SEO">SEO</label>
+              <label class="check"><input type="checkbox" name="services" value="Meta Ads">Meta Ads</label>
+              <label class="check"><input type="checkbox" name="services" value="LinkedIn Ads">LinkedIn Ads</label>
+              <label class="check"><input type="checkbox" name="services" value="Landing Pages">Landing pages</label>
+              <label class="check"><input type="checkbox" name="services" value="CRO">CRO</label>
+              <label class="check"><input type="checkbox" name="services" value="Website Development">Website development</label>
+              <label class="check"><input type="checkbox" name="services" value="Email Marketing">Email marketing</label>
+              <label class="check"><input type="checkbox" name="services" value="Analytics">Analytics</label>
+              <label class="check"><input type="checkbox" name="services" value="AI Automation">AI and automation</label>
+              <label class="check"><input type="checkbox" name="services" value="CRM Integration">CRM integration</label>
+              <label class="check"><input type="checkbox" name="services" value="No thanks">No thanks</label>
+            </div>
+          </div>
+
+          <div class="nav"><button type="button" class="secondary back">Back</button><button type="button" class="primary next">Continue</button></div>
+        </section>
+
+        <section class="step" data-title="Recommendation">
+          <div class="eyebrow">7 of 8 · Recommendation</div>
+          <h2>Based on your experience so far...</h2>
+          <div class="field">
+            <label class="title">How likely are you to recommend us to another business?</label>
+            <div class="scale nps" data-field="nps"></div>
+            <input type="hidden" name="nps">
+            <div class="scale-labels"><span>0 · Not at all likely</span><span>10 · Extremely likely</span></div>
+            <div class="conditional" id="npsFollow">
+              <label class="title">What would need to improve for you to give us a higher score?</label>
+              <textarea name="nps_reason"></textarea>
+            </div>
+          </div>
+
+          <div class="nav"><button type="button" class="secondary back">Back</button><button type="button" class="primary next">Continue</button></div>
+        </section>
+
+        <section class="step" data-title="Final thoughts">
+          <div class="eyebrow">8 of 8 · Final thoughts</div>
+          <h2>One final question.</h2>
+          <div class="field">
+            <label class="title">If you were our Account Manager, what’s the one thing you’d ask the team to improve next month?</label>
+            <textarea name="account_manager_view"></textarea>
+          </div>
+          <div class="field">
+            <label class="title">Anything else you’d like the team to know?</label>
+            <textarea name="anything_else"></textarea>
+          </div>
+          <div class="nav"><button type="button" class="secondary back">Back</button><button type="submit" class="primary">Submit Scorecard</button></div>
+        </section>
+
+        <section class="step" data-title="Complete" id="resultStep">
+          <div class="eyebrow">🎉 Complete</div>
+          <h2>Thanks for your feedback.</h2>
+          <p class="lead">Your responses will help us improve the partnership and make sure we’re focused on what matters most to your business.</p>
+
+          <div class="summary">
+            <div class="score-ring" id="scoreRing">
+              <div class="score-inner"><b id="scoreValue">0</b><div>/100</div></div>
+            </div>
+            <div>
+              <span class="status-pill" id="statusPill">Healthy</span>
+              <h3 id="statusHeading" style="font-size:24px;margin:0 0 8px">Partnership health</h3>
+              <p id="statusCopy" style="color:#64748b;line-height:1.6;margin:0"></p>
+              <div class="summary-list" id="summaryList"></div>
+            </div>
+          </div>
+
+          <div class="note">In a live Tally or Notion setup, this score would normally be hidden from the client and sent to your internal dashboard instead.</div>
+          <div class="nav">
+            <button type="button" class="secondary" id="downloadJson">Download Response</button>
+            <button type="button" class="primary" id="restart">Start New Scorecard</button>
+          </div>
+        </section>
+
+      </div>
+    </form>
+  </div>
+
+<script>
+const steps=[...document.querySelectorAll('.step')];
+let current=0;
+const form=document.getElementById('scorecard');
+
+function updateProgress(){
+  const pct=current===steps.length-1?100:Math.round((current/(steps.length-2))*100);
+  document.getElementById('progressBar').style.width=pct+'%';
+  document.getElementById('progressPercent').textContent=pct+'%';
+  document.getElementById('progressText').textContent=steps[current].dataset.title;
+}
+function showStep(i){
+  steps.forEach((s,idx)=>s.classList.toggle('active',idx===i));
+  current=i; updateProgress(); window.scrollTo({top:0,behavior:'smooth'});
+}
+document.querySelectorAll('.next').forEach(btn=>btn.addEventListener('click',()=>{
+  const required=[...steps[current].querySelectorAll('[required]')];
+  const invalid=required.find(el=>!el.value);
+  if(invalid){invalid.focus(); return;}
+  showStep(Math.min(current+1,steps.length-1));
+}));
+document.querySelectorAll('.back').forEach(btn=>btn.addEventListener('click',()=>showStep(Math.max(current-1,0))));
+
+document.querySelectorAll('.single-choice').forEach(group=>{
+  group.addEventListener('change',e=>{
+    group.querySelectorAll('.option').forEach(o=>o.classList.remove('selected'));
+    e.target.closest('.option').classList.add('selected');
+    const name=group.dataset.name;
+    const val=e.target.value;
+    if(name==='overall') document.getElementById('overallFollow').classList.toggle('show',Number(val)<=6);
+    if(name==='informed') document.getElementById('informedFollow').classList.toggle('show',Number(val)<=3);
+    if(name==='lead_quality') document.getElementById('leadFollow').classList.toggle('show',Number(val)===3);
+  });
+});
+
+function buildScale(el,max,start=1){
+  for(let i=start;i<=max;i++){
+    const b=document.createElement('button'); b.type='button'; b.textContent=i; b.dataset.value=i;
+    b.addEventListener('click',()=>{
+      [...el.children].forEach(x=>x.classList.remove('active','low','mid','high'));
+      const cls=i<=4?'low':i<=7?'mid':'high';
+      b.classList.add('active',cls);
+      const field=el.dataset.field;
+      document.querySelector(`input[name="${field}"]`).value=i;
+      if(field==='communication') document.getElementById('communicationFollow').classList.toggle('show',i<=6);
+      if(field==='alignment') document.getElementById('alignmentFollow').classList.toggle('show',i<=6);
+      if(field==='nps') document.getElementById('npsFollow').classList.toggle('show',i<=7);
+    });
+    el.appendChild(b);
+  }
+}
+document.querySelectorAll('.scale').forEach(el=>buildScale(el,10,el.classList.contains('nps')?0:1));
+
+document.querySelectorAll('.stars').forEach(stars=>{
+  stars.querySelectorAll('button').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const v=Number(btn.dataset.value);
+      stars.querySelectorAll('button').forEach(x=>x.classList.toggle('active',Number(x.dataset.value)<=v));
+      document.querySelector('input[name="responsiveness"]').value=v;
+      document.getElementById('responsiveFollow').classList.toggle('show',v<=3);
+    });
+  });
+});
+
+function conditionalForChecks(name,followId,noneValue){
+  document.querySelectorAll(`input[name="${name}"]`).forEach(cb=>cb.addEventListener('change',()=>{
+    const vals=[...document.querySelectorAll(`input[name="${name}"]:checked`)].map(x=>x.value);
+    const show=vals.some(v=>v!==noneValue);
+    document.getElementById(followId).classList.toggle('show',show);
+  }));
+}
+conditionalForChecks('business_updates','businessFollow','Nothing new');
+conditionalForChecks('wins','winsFollow','');
+conditionalForChecks('upcoming','upcomingFollow','Nothing planned');
+
+function getData(){
+  const fd=new FormData(form), data={};
+  for(const [k,v] of fd.entries()){
+    if(data[k]) data[k]=Array.isArray(data[k])?[...data[k],v]:[data[k],v];
+    else data[k]=v;
+  }
+  return data;
+}
+
+function normaliseLead(v){
+  if(v===''||v===undefined) return null;
+  return Number(v);
+}
+
+function calculateScore(data){
+  const overall=Number(data.overall||0);
+  const comm=Number(data.communication||0);
+  const responsive=Number(data.responsiveness||0)*2;
+  const lead=normaliseLead(data.lead_quality);
+  const alignment=Number(data.alignment||0);
+  const nps=Number(data.nps||0);
+
+  const parts=[
+    [overall,15],
+    [comm,10],
+    [responsive,10],
+    [alignment,15],
+    [nps,20]
+  ];
+  if(lead!==null) parts.push([lead,15]);
+
+  const informed=Number(data.informed||0);
+  parts.push([informed,15]);
+
+  const usedWeight=parts.reduce((a,p)=>a+p[1],0);
+  const weighted=parts.reduce((a,[score,w])=>a+(score/10)*w,0);
+  return Math.round((weighted/usedWeight)*100);
+}
+
+function statusFor(score){
+  if(score>=90) return ['Thriving','#16a34a','#ecfdf3','A very strong partnership. Keep building on what is working and look for sensible growth opportunities.'];
+  if(score>=75) return ['Healthy','#16a34a','#ecfdf3','The relationship is in a good place. Review any written feedback and keep communication proactive.'];
+  if(score>=60) return ['Needs attention','#d97706','#fffbeb','There are some areas to address. Agree clear actions before the next client meeting.'];
+  if(score>=40) return ['At risk','#ea580c','#fff7ed','A proactive conversation is recommended. Review the low scores and create a clear improvement plan.'];
+  return ['Immediate follow-up','#dc2626','#fef2f2','Senior review recommended. Contact the client promptly and agree immediate next steps.'];
+}
+
+form.addEventListener('submit',e=>{
+  e.preventDefault();
+  const data=getData();
+  const score=calculateScore(data);
+  const [status,color,bg,copy]=statusFor(score);
+
+  document.getElementById('scoreValue').textContent=score;
+  document.getElementById('scoreRing').style.background=`conic-gradient(${color} ${score*3.6}deg,#e5e7eb 0deg)`;
+  const pill=document.getElementById('statusPill');
+  pill.textContent=status; pill.style.color=color; pill.style.background=bg;
+  document.getElementById('statusCopy').textContent=copy;
+
+  const rows=[
+    ['Overall satisfaction',data.overall?`${data.overall}/10`:'Not answered'],
+    ['Communication',data.communication?`${data.communication}/10`:'Not answered'],
+    ['Responsiveness',data.responsiveness?`${data.responsiveness}/5`:'Not answered'],
+    ['Priority alignment',data.alignment?`${data.alignment}/10`:'Not answered'],
+    ['Recommendation score',data.nps!==undefined&&data.nps!==''?`${data.nps}/10`:'Not answered']
+  ];
+  document.getElementById('summaryList').innerHTML=rows.map(r=>`<div class="summary-row"><span>${r[0]}</span><strong>${r[1]}</strong></div>`).join('');
+
+  localStorage.setItem('clientScorecardLatest',JSON.stringify({...data,health_score:score,status},null,2));
+  showStep(steps.length-1);
+});
+
+document.getElementById('downloadJson').addEventListener('click',()=>{
+  const saved=localStorage.getItem('clientScorecardLatest')||'{}';
+  const blob=new Blob([saved],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='client-scorecard-response.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+
+document.getElementById('restart').addEventListener('click',()=>{
+  form.reset();
+  document.querySelectorAll('.selected,.active').forEach(x=>x.classList.remove('selected','active','low','mid','high'));
+  document.querySelectorAll('.conditional').forEach(x=>x.classList.remove('show'));
+  showStep(0);
+});
+
+const now=new Date();
+const month=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+document.querySelector('input[name="month"]').value=month;
+updateProgress();
+</script>
+
+<!-- ENHANCEMENT SPECIFICATION ADDED -->
+<div style="display:none" id="enhancement-spec">
+<h2>Version 2 Enhancements</h2>
+<ul>
+<li>Add 'Ease of Working Together' section with conditional follow-up for communication, approvals, meetings, reporting and responsibilities.</li>
+<li>Replace responsiveness stars with separate Response Time satisfaction question (Always / Most of the time / Sometimes / Rarely) plus expected response time conditional question.</li>
+<li>Add Overall Results question with conditional 'Which area needs attention?' options:
+Lead Volume, Lead Quality, Sales, Revenue, ROI, Website Traffic, Rankings, Brand Awareness, Reporting.</li>
+<li>Add Service Selector (hidden/internal or first page): PPC, SEO, Meta, Website, CRO.</li>
+<li>Conditional blocks:
+<ul>
+<li>If PPC selected: Google Ads satisfaction + priority for next month.</li>
+<li>If Meta selected: Meta satisfaction + priority for next month.</li>
+<li>If SEO selected: SEO satisfaction + priority for next month.</li>
+</ul>
+</li>
+<li>Add Reporting section:
+Useful / Easy to understand / Needs improvement with conditional follow-up.</li>
+<li>Add Proactivity score (1-10) with follow-up asking where more proactive support is needed.</li>
+<li>Modify NPS:
+Only if score >=9 show referral request:
+'Do you know another business who may benefit from speaking with us?'
+Yes / Possibly / Not right now
+Followed by optional contact details.</li>
+<li>Include hidden internal flags:
+Low communication, Low performance, Poor lead quality, Referral opportunity, Upsell opportunity, Churn risk.</li>
+</ul>
+</div>
+
+</body>
+</html>
